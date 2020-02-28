@@ -1,0 +1,189 @@
+:argv.
+
+SystemClass := !getClassRef "java.lang.System".
+system := system.
+metadata := "".
+
+!if ((SystemClass getProperty "os.name") startsWith "Windows"),{
+   system := {:cmd.
+      !println cmd.
+      rc:=!exec "cmd","/c",cmd.
+      !println "rc=",rc.
+   }.
+},{
+   system := {:cmd.
+      !println cmd.
+      rc:=!exec "sh","-c",cmd.
+      !println "rc=",rc.
+   }.
+}.
+
+files := {
+   noExt := {:name.
+      dot := name lastIndexOf ".".
+      !if (dot > 0), {
+        name substring 0,dot.
+      },{
+        name.
+      }.
+   }.
+   getExt := {:name.
+      dot := name lastIndexOf ".".
+      !if (dot > 0), {
+          name substring dot,(name length).
+      },{
+        name.
+      }.
+   }.
+} new.
+
+timeSum := {:startTime, duration.
+   sHour := startTime substring 0,2 intValue.
+   sMin := startTime substring 3,5 intValue.
+   sSec := startTime substring 6,8 intValue.
+   dHour := duration substring 0,2 intValue.
+   dMin := duration substring 3,5 intValue.
+   dSec := duration substring 6,8 intValue.
+   tSec := sSec + dSec.
+   !if (tSec > 60),{
+      dMin := dMin + 1.
+      tSec := tSec - 60.
+   }.
+   tMin := sMin + dMin.
+   !if (tMin > 60),{
+      dHour := dHour + 1.
+      tMin := tMin - 60.
+   }.
+   tHour := sHour + dHour.
+
+   return := return.
+   !if (tHour = 0),{
+       return := "00".
+   },{
+      !if (tHour < 10),{
+         return := "0" + tHour.
+      },{
+         return := tHour.
+      }.
+   }.
+   return:= return + ":".
+
+   !if (tMin = 0),{
+      return := return + "00".
+   },{
+     !if (tMin < 10),{
+         return := return + "0" + tMin.
+     },{
+         return := return + tMin.
+     }.
+   }.
+   return:= return + ":".
+
+   !if (tSec = 0),{
+      return := return + "00".
+   },{
+      !if (tSec < 10),{
+         return := return + "0" + tSec.
+      },{
+         return := return + tSec.
+      }.
+   }.
+}.
+
+showArgs := {
+   cnt := 0.
+   !foreach argv,{:arg.
+      !println cnt, ">",arg.
+      cnt := cnt + 1. 
+   }.
+}.
+
+tagHelp := {:usage.
+   !println ("Usage: joe " + (argv get 0) + " " + (argv get 1) + " " + usage).
+}.
+
+fixArgv := {:n.
+   newArgv := !newArray (argv length; - n).
+   newArgv set 0, (argv get 0).
+   idx := 1.
+   !foreach argv,(n+1),{:arg.
+       newArgv set idx,arg.
+       idx := idx + 1.
+   }.
+   argv := newArgv.
+}.
+
+@setAlbum := {
+   !if (argv length; <= 3), {
+      tagHelp exec "<album>  nextTag". 
+   },{
+      metadata := metadata + " -metadata album=""" + (argv get 2) + """ ".
+      fixArgv exec 2.
+      !!getVariable (argv get 1) exec.
+   }.
+}.
+
+@setArtist := {
+   !if (argv length; <= 3), {
+      tagHelp exec "<artist>  nextTag". 
+   },{.
+      metadata := metadata + " -metadata artist=""" + (argv get 2) + """ ".
+      fixArgv exec 2.
+      !!getVariable (argv get 1) exec.
+   }.
+}.
+
+@split := {
+   ! if (argv length; <= 3), {
+      tagHelp exec "<file-name> [ <name> <time-start> ] ... ". 
+   },{
+      ext := files getExt (argv get 2).
+      cmd := "ffmpeg -i """+(argv get 2)+""" ".
+      idx := 3.
+      track := 1.
+      start := null.
+      !while { (idx + 1) < (argv length) },{
+          start := argv get (idx + 1).
+          cmd := cmd + " -ss " + start.
+          !if ((idx + 3) < (argv length)),{
+             start := argv get (idx + 3).
+             cmd := cmd + " -to " + start.
+          }.
+          !if (track < 9),{
+             cmd := cmd + " -metadata track=0" + track ;
+          },{
+             cmd := cmd + " -metadata track=" + track;
+          }.
+          cmd := cmd + " -metadata title=""" + (argv get idx) + """";
+          track := track + 1.
+          cmd := cmd + metadata + " -acodec copy -vcodec copy """
+                     + (argv get idx)+ext+"""".
+          idx := idx + 2.
+      }.
+      system exec cmd.
+   }.
+}.
+
+@help := {
+   !println ("Usage: joe " + (argv get 0) + " <tag> [ ... ]").
+   !println "Available tags:".
+   !foreach (!! getVariablesNames), {:tag.
+      !if (tag startsWith "@"),{
+         !println "   ",tag.
+      }.
+   }
+}.
+
+!if (argv length; > 1),{
+   toExec := !!getVariable  (argv get 1).
+   !if (!isNull toExec),{
+      !println "Tag ",(argv get 1), " is not present!".
+      @help exec.
+      !systemExit 2.
+   },{
+      toExec exec.
+      !systemExit 0.
+   }.
+}, {
+   @help exec.
+}.
