@@ -37,67 +37,6 @@ files := {
    }.
 } new.
 
-timeSum := {:startTime, duration.
-   sHour := startTime substring 0,2 intValue.
-   sMin := startTime substring 3,5 intValue.
-   sSec := startTime substring 6,8 intValue.
-   dHour := duration substring 0,2 intValue.
-   dMin := duration substring 3,5 intValue.
-   dSec := duration substring 6,8 intValue.
-   tSec := sSec + dSec.
-   !if (tSec > 60),{
-      dMin := dMin + 1.
-      tSec := tSec - 60.
-   }.
-   tMin := sMin + dMin.
-   !if (tMin > 60),{
-      dHour := dHour + 1.
-      tMin := tMin - 60.
-   }.
-   tHour := sHour + dHour.
-
-   return := return.
-   !if (tHour = 0),{
-       return := "00".
-   },{
-      !if (tHour < 10),{
-         return := "0" + tHour.
-      },{
-         return := tHour.
-      }.
-   }.
-   return:= return + ":".
-
-   !if (tMin = 0),{
-      return := return + "00".
-   },{
-     !if (tMin < 10),{
-         return := return + "0" + tMin.
-     },{
-         return := return + tMin.
-     }.
-   }.
-   return:= return + ":".
-
-   !if (tSec = 0),{
-      return := return + "00".
-   },{
-      !if (tSec < 10),{
-         return := return + "0" + tSec.
-      },{
-         return := return + tSec.
-      }.
-   }.
-}.
-
-showArgs := {
-   cnt := 0.
-   !foreach argv,{:arg.
-      !println cnt, ">",arg.
-      cnt := cnt + 1. 
-   }.
-}.
-
 tagHelp := {:usage.
    !println ("Usage: joe " + (argv get 0) + " " + (argv get 1) + " " + usage).
 }.
