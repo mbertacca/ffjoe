@@ -1,7 +1,7 @@
 # ffjoe
 A mediafile splitter
 
-Sometimes I need to split a mediafile (mainly audio) in parts without loosing the quality: ffmpeg is a wonderful tool to do that, however its command line interface is complex and hard to remember.
+Sometimes I need to split a mediafile (mainly audio) in parts without loosing the quality: ffmpeg (https://www.ffmpeg.org) is a wonderful tool to do that, however its command line interface is complex and hard to remember.
 For this reason I wrote a simple script in JOE language (https://github.com/mbertacca/joe) in order to simplify the ffmpeg usage. Acyually the interface is still using command line, however the use is straightforward.
 If you run the script without argument you get the following help:
 
