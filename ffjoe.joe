@@ -73,7 +73,18 @@ fixArgv := {:n.
    }.
 }.
 
+
 @setAlbum := {
+   !if (argv length; <= 3), {
+      tagHelp exec "<album>  nextTag". 
+   },{
+      metadata := metadata + " -metadata album=""" + (argv get 2) + """ ".
+      fixArgv exec 2.
+      !!getVariable (argv get 1) exec.
+   }.
+}.
+
+@updateAlbum := {
    !if (argv length; <= 3), {
       tagHelp exec "<album>  nextTag". 
    },{
@@ -84,6 +95,16 @@ fixArgv := {:n.
 }.
 
 @setArtist := {
+   !if (argv length; <= 3), {
+      tagHelp exec "<artist>  nextTag". 
+   },{.
+      metadata := metadata + " -metadata artist=""" + (argv get 2) + """ ".
+      fixArgv exec 2.
+      !!getVariable (argv get 1) exec.
+   }.
+}.
+
+@updateArtist := {
    !if (argv length; <= 3), {
       tagHelp exec "<artist>  nextTag". 
    },{.
