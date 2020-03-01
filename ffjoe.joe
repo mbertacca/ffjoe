@@ -1,6 +1,11 @@
 :argv.
 
 SystemClass := !getClassRef "java.lang.System".
+File := !getClassRef "java.io.File".
+Paths := !getClassRef "java.nio.file.Paths".
+Files := !getClassRef "java.nio.file.Files".
+MoveOption := !getStaticField "java.nio.file.StandardCopyOption",
+                              "REPLACE_EXISTING".
 system := system.
 metadata := "".
 
@@ -52,11 +57,27 @@ fixArgv := {:n.
    argv := newArgv.
 }.
 
+@writeMetadata := {
+   ! if (argv length; <= 2), {
+      tagHelp exec "<file-name> ... ". 
+   },{
+      !foreach argv,2,{:file.
+         ext := files getExt file.
+         tmp := (File createTempFile "ffjoe",ext) getName.
+         cmd := "ffmpeg -hide_banner -y -i """+file+""" " + metadata +
+                " -acodec copy -vcodec copy """
+                     + tmp + """".
+         system exec cmd.
+         Files move (Paths get tmp,""),(Paths get file,""),MoveOption.
+      }.
+   }.
+}.
+
 @setAlbum := {
    !if (argv length; <= 3), {
       tagHelp exec "<album>  nextTag". 
    },{
-      metadata := metadata + " -metadata album=""" + (argv get 2) + """ ".
+      metadata := metadata + " -metadata:s:0 album=""" + (argv get 2) + """ ".
       fixArgv exec 2.
       !!getVariable (argv get 1) exec.
    }.
@@ -66,7 +87,7 @@ fixArgv := {:n.
    !if (argv length; <= 3), {
       tagHelp exec "<artist>  nextTag". 
    },{.
-      metadata := metadata + " -metadata artist=""" + (argv get 2) + """ ".
+      metadata := metadata + " -metadata:s:0 artist=""" + (argv get 2) + """ ".
       fixArgv exec 2.
       !!getVariable (argv get 1) exec.
    }.
