@@ -73,45 +73,27 @@ fixArgv := {:n.
    }.
 }.
 
-
-@setAlbum := {
-   !if (argv length; <= 3), {
-      tagHelp exec "<album>  nextTag". 
+setMetadata := {:key,opt.
+   tag:=.
+   !if (argv length; <= 3 or {tag := !!getVariable (argv get 3). !isNull tag}), {
+      tagHelp exec "<value>  nextTag". 
    },{
-      metadata := metadata + " -metadata album=""" + (argv get 2) + """ ".
+      metadata := metadata + " -metadata"+opt+key+"="""+(argv get 2)+""" ".
       fixArgv exec 2.
-      !!getVariable (argv get 1) exec.
+      tag exec.
    }.
 }.
 
-@updateAlbum := {
-   !if (argv length; <= 3), {
-      tagHelp exec "<album>  nextTag". 
-   },{
-      metadata := metadata + " -metadata:s:0 album=""" + (argv get 2) + """ ".
-      fixArgv exec 2.
-      !!getVariable (argv get 1) exec.
-   }.
+@setAlbum := {
+   setMetadata exec "album"," ".
 }.
 
 @setArtist := {
-   !if (argv length; <= 3), {
-      tagHelp exec "<artist>  nextTag". 
-   },{.
-      metadata := metadata + " -metadata artist=""" + (argv get 2) + """ ".
-      fixArgv exec 2.
-      !!getVariable (argv get 1) exec.
-   }.
+   setMetadata exec "artist"," ".
 }.
 
-@updateArtist := {
-   !if (argv length; <= 3), {
-      tagHelp exec "<artist>  nextTag". 
-   },{.
-      metadata := metadata + " -metadata:s:0 artist=""" + (argv get 2) + """ ".
-      fixArgv exec 2.
-      !!getVariable (argv get 1) exec.
-   }.
+@setTitle := {
+   setMetadata exec "title"," ".
 }.
 
 @split := {
